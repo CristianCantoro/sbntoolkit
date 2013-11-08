@@ -87,7 +87,8 @@ class Item(object):
 
             templates = []
             try:
-                templates = wtp.data_from_templates(self.name, lang='it')
+                if self.name:
+                    templates = wtp.data_from_templates(self.name, lang='it')
             except Exception as e:
                 logger.error(e)
 
@@ -96,7 +97,7 @@ class Item(object):
                                 'controllo_di_autorità']
             ac_data = ac_template[0]['data'] if ac_template else {}
 
-            logger.debug('ac_data: {data}'.format(data=ac_data))
+            # logger.debug('ac_data: {data}'.format(data=ac_data))
 
             if ac_data.get('VIAF') is not None:
                 self.codes['viaf'] = ac_data['VIAF'].encode('utf-8')
@@ -276,6 +277,7 @@ class Item(object):
                 logger.error(e)
 
             if self.page.name:
+                self.page.set_WikiPage()
                 self.page.set_info()
 
     def set_data_name(self):
@@ -285,9 +287,11 @@ class Item(object):
                                         fromPage(self.page.WikiPage)
                 self.data.data = self.data.ItemPage.get()
                 self.data.name = self.data.ItemPage.id
-                self.data.set_info()
             except Exception as e:
                 logger.error(e)
+
+            if self.data.name:
+                self.data.set_info()
 
 if __name__ == '__main__':
     # logging
