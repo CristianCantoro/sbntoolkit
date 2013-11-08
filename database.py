@@ -75,7 +75,7 @@ def drop():
 
 def write_codes(code_name, code_value, page=None, data=None, linked=None):
 
-    logger.debug('value: %s' %(code_value and (page or data)) )
+    # logger.debug('value: %s' %(code_value and (page or data)) )
 
     if code_value and (page or data):
         con = sqlite.connect(DATABASE)
@@ -141,7 +141,7 @@ def write_codes(code_name, code_value, page=None, data=None, linked=None):
 
           for s in sources:
               datum = sources[s]
-              logger.debug('{s}: {datum}'.format(s=s, datum=datum))
+              # logger.debug('{s}: {datum}'.format(s=s, datum=datum))
               if datum:
 
                   query = """INSERT OR REPLACE INTO 
@@ -155,7 +155,7 @@ def write_codes(code_name, code_value, page=None, data=None, linked=None):
                                         "{title}",
                                         {touched},
                                         {latest},
-                                        {linked}
+                                        "{linked}"
                                        )
                               """.format(
                                   table=s,
@@ -163,7 +163,7 @@ def write_codes(code_name, code_value, page=None, data=None, linked=None):
                                   title=datum['title'].encode('utf-8') or 'NULL',
                                   touched=datum['touched'] or 'NULL',
                                   latest=datum['lastrevid'] or 'NULL',
-                                  linked=linked or 'NULL'
+                                  linked=(linked and linked.encode('utf-8')) or 'NULL'
                                  )
                   try:
                       with con:
