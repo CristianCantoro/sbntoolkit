@@ -14,12 +14,15 @@ import database
 
 WIKIPEDIA_OUTPUT = 'wp_pages.txt'
 WIKIDATA_OUTPUT = 'wd_items.txt'
+WIKIDATA_OUTPUT_TMP = 'tmp_wd_items.txt'
 UPDATE_OUTPUT = 'items_to_update.txt'
 
 FIELDS = ['lastrevid', 'pageid', 'title', 'counter', 'length',
           'contentmodel', 'pagelanguage', 'touched', 'ns']
 
 OUT_FIELDS = FIELDS + ['source']
+
+AVAILABLE_PROPERTIES = set(['P396', 'P214', 'P244'])
 
 # logging
 logger = logging.getLogger('sbnredirect.item')
@@ -86,9 +89,9 @@ def get_items_to_update(table, items):
 
     return items_to_get
 
-def get_wikidata_items_from_database():
+def get_wikidata_items_from_database(properties):
     try:
-        raise Exception
+        pass
     except Exception as e:
         logger.error(e)
 
@@ -101,60 +104,54 @@ def _write_wikidata_file_header():
             writer = UnicodeWriter(out)
             keys = [unicode(k) for k in FIELDS]
             writer.writerow(keys)
+            out.flush()
 
-def _write_wikidata_file_items(items):
-    with open(WIKIDATA_OUTPUT, 'a+') as out:
+def _write_wikidata_file_items(items):    
+    with open(WIKIDATA_OUTPUT, 'a') as out:
         writer = UnicodeWriter(out)
         for item in items:
-            row = [item[k] for k in FIELDS]
+            row = [unicode(item[k]) for k in FIELDS]
             writer.writerow(row)
+        out.flush()
 
-def get_wikidata_items_from_api():
-    try:
-        items = get_items_with_property("P214")
-    except Exception as e:
-        logger.error(e)
+def _get_property(p):
+    if p in AVAILABLE_PROPERTIES:
+        logger.debug('Get property {} from API'.format(p))
+        items = None
+        try:
+            items = get_items_with_property(p)
+        except Exception as e:
+            logger.error(e)
 
-    if items:
-        logger.debug('Writing results for P214')
-        _write_wikidata_file_header()
-        _write_wikidata_file_items(items)
-
-    try:
-        items = get_items_with_property("P396")
-    except Exception as e:
-        logger.error(e)
-
-    if items:
-        logger.debug('Writing results for P396')
-        _write_wikidata_file_header()
-        _write_wikidata_file_items(items)
-
-    try:
-        items = get_items_with_property("P244")
-    except Exception as e:
-        logger.error(e)
-
-    if items:
-        logger.debug('Writing results for P244')
-        _write_wikidata_file_header()
-        _write_wikidata_file_items(items)
-
-    p1 = Popen(['sort',WIKIDATA_OUTPUT], stdout=PIPE)
-    with open(WIKIDATA_OUTPUT, 'w') as f:
-        p2 = Popen('uniq', stdin=p1.stdout, stdout=f)
+        if items:
+            logger.debug('Writing results for {}'.format(p))
+            _write_wikidata_file_header()
+            _write_wikidata_file_items(items)
 
 
-def get_wikidata_items():
+def get_wikidata_items_from_api(properties):
+
+    if properties:
+        for p in properties:
+            _get_property(p)
+
+    # FIXME
+    # lots of bugs in I/O
+    p1 = Popen(['sort','-r', WIKIDATA_OUTPUT, '-o', WIKIDATA_OUTPUT_TMP],
+               shell=True)
+    p2 = Popen(['uniq', WIKIDATA_OUTPUT_TMP, WIKIDATA_OUTPUT],
+               shell=True)
+
+def get_wikidata_items(properties):
     items = []
 
     logger.debug('Try DB')
 
-    items = get_wikidata_items_from_database()
+    items = get_wikidata_items_from_database(properties)
     
     if not items:
         logger.debug('Try API')
-        get_wikidata_items_from_api()
+        get_wikidata_items_from_api(properties)
 
 
 def __touched(touched):
@@ -214,12 +211,12 @@ def drop(filename):
         logger.error(output)
 
 
-def get_items(pedia=False, data=False):
+def get_items(pedia=False, data=False, properties=None):
     if pedia:
         get_wikipedia_pages()
 
     if data:
-        get_wikidata_items()
+        get_wikidata_items(properties)
 
 def get_all_items_to_update(items=None):
 
@@ -312,7 +309,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Update routines.')
     parser.add_argument('--drop', action='store_true',
-                        help='Drop {wp} and {wd}'.format(
+                        help='Drop {wp} and {wd} and exits'.format(
                             wp=WIKIPEDIA_OUTPUT,
                             wd=WIKIDATA_OUTPUT
                            )
@@ -321,8 +318,11 @@ if __name__ == '__main__':
                        help='Get Wikipedia pages')
     parser.add_argument('--data', '-d', action='store_true',
                        help='Get Wikidata items')
+    parser.add_argument('--properties', '-r', action='append',
+                       help='Wikidata properties to get (implies --data)')
 
     args = parser.parse_args()
+    print args
 
     # print
     # items = get_items_with_property('P396')
@@ -336,7 +336,10 @@ if __name__ == '__main__':
         drop(UPDATE_OUTPUT)
         sys.exit(0)
 
-    get_items(args.pedia, args.data)
+    if args.properties:
+        args.data = True
+
+    get_items(args.pedia, args.data, args.properties)
 
     items_to_update = get_all_items_to_update()
 
@@ -345,5 +348,5 @@ if __name__ == '__main__':
         keys = [unicode(k) for k in OUT_FIELDS]
         writer.writerow(keys)
         for item in items_to_update:
-            row = [item[k] for k in keys]
+            row = [unicode(item[k]) for k in keys]
             writer.writerow(row)

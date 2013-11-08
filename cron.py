@@ -33,66 +33,72 @@ rootlogger.addHandler(console)
 logger = logging.getLogger('sbnredirect.cron')
 
 def get_items_with_info(items):
-    items_to_process = []
-
     for item in items:
+
+        itemobj = None
+        logger.debug('Processing {}'.format(item['title']))
 
         if item['source']== 'data':
             # Wikidata item
-            item = Item(data=item['title'], 
-                        info=dict((k,item[k]) for k in INFO)
-                       )
+            try:
+                itemobj = Item(data=item['title'], 
+                               info=dict((k,item[k]) for k in INFO)
+                           )
+            except Exception as e:
+                logger.error(e)
 
         else:
             # Wikipedia page
-            item = Item(page=item['title'], 
-                        info=dict((k,item[k]) for k in INFO)
+            try:
+                itemobj = Item(page=item['title'], 
+                          info=dict((k,item[k]) for k in INFO)
                        )
+            except Exception as e:
+                logger.error(e)
 
-        items_to_process.append(item)
-
-    return items_to_process
+        if itemobj:
+            yield itemobj
 
 def get_items_from_cli(items):
 
-    items_to_process = []
-
     for itemname in items:
+
+        itemobj = None
+        logger.debug('Processing {}'.format(itemname))
 
         if itemname.startswith('data:') or itemname.startswith('wikidata:'):
             # Wikidata item
             itemname = itemname.replace('wiki','').replace('data:','')
-            item = Item(data=itemname)
+            try:
+                itemobj = Item(data=itemname)
+            except Exception as e:
+                logger.error(e)
 
         else:
             # Wikipedia page
-            item = Item(page=itemname)
+            try:
+                itemobj = Item(page=itemname)
+            except Exception as e:
+                logger.error(e)
 
-        items_to_process.append(item)
-
-    return items_to_process
+        if itemobj:
+            yield itemobj
 
 def save_authority_codes(items):
 
-    count = 0
-    total = len(items)
     for item in items:
-        count += 1
-        logger.debug("{count}/{total}".format(
-                        count=count,
-                        total=total
-                        )
-                    )
         logger.debug("processing {}".format(item))
 
         wikidata_codes = item.data.get_codes()
         wikipedia_codes = item.page.get_codes()
 
         for code in wikipedia_codes:
-            database.write_codes(code, wikipedia_codes[code], page=item.page.info)
+            database.write_codes(code, wikipedia_codes[code], 
+                                 page=item.page.info)
 
         for code in wikidata_codes:
-            database.write_codes(code, wikidata_codes[code], data=item.data.info)
+            database.write_codes(code, wikidata_codes[code], 
+                                 data=item.data.info)
 
 if __name__ == '__main__':
 

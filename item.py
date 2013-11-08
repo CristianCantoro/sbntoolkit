@@ -83,6 +83,7 @@ class Item(object):
 
             self.codes = CODES.copy()
 
+            templates = []
             try:
                 templates = wtp.data_from_templates(self.name, lang='it')
             except Exception as e:
