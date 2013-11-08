@@ -1,0 +1,10 @@
+lastrevid,pageid,title,counter,length,contentmodel,pagelanguage,touched,ns,source
+56116925,855077,Agustín Gaínza,,3463,wikitext,it,2013-09-17T08:34:40Z,0,pages
+56128394,1442438,Alarico Gattia,,2100,wikitext,it,2013-08-16T12:55:17Z,0,pages
+56128420,2042524,Alasdair Gray,,4457,wikitext,it,2013-11-05T21:58:37Z,0,pages
+56128449,2690997,Alastair Cameron,,1777,wikitext,it,2013-10-17T01:43:53Z,0,pages
+56128687,4077294,Alban Köhler,,767,wikitext,it,2013-09-08T14:43:41Z,0,pages
+56128789,321159,Albano da Magonza,,2530,wikitext,it,2013-11-04T13:49:17Z,0,pages
+56129118,3784566,Alberico delle Tre Fontane,,843,wikitext,it,2013-09-03T19:37:14Z,0,pages
+56129120,700807,Alberico di Cîteaux,,2662,wikitext,it,2013-10-27T09:28:51Z,0,pages
+56129124,3768953,Alberico di Utrecht,,3548,wikitext,it,2013-10-28T13:35:53Z,0,pages
