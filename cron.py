@@ -92,13 +92,18 @@ def save_authority_codes(items):
         wikidata_codes = item.data.get_codes()
         wikipedia_codes = item.page.get_codes()
 
+        import pdb
+        pdb.set_trace()
+
         for code in wikipedia_codes:
             database.write_codes(code, wikipedia_codes[code], 
-                                 page=item.page.info)
+                                 page=item.page.info,
+                                 linked=item.data.name)
 
         for code in wikidata_codes:
             database.write_codes(code, wikidata_codes[code], 
-                                 data=item.data.info)
+                                 data=item.data.info,
+                                 linked=item.page.name)
 
 if __name__ == '__main__':
 

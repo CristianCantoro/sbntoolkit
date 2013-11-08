@@ -62,8 +62,10 @@ class Item(object):
 
         @property
         def id(self):
-            return isinstance(self.WikiPage, pywikibot.Page) and \
-                    self.WikiPage._pageid
+            pageid = (isinstance(self.WikiPage, pywikibot.Page) and \
+                        self.WikiPage._pageid)
+            if pageid:
+                return pageid
 
         def set_WikiPage(self):
             if not self.WikiPage:
@@ -115,8 +117,10 @@ class Item(object):
                             replace('T','').replace('Z','')
 
         def __lastrevid(self):
-            return isinstance(self.WikiPage, pywikibot.Page) and \
-                        self.WikiPage.latestRevision()
+            lastrevid = isinstance(self.WikiPage, pywikibot.Page) and \
+                            self.WikiPage.latestRevision()
+            if lastrevid:
+               return lastrevid
 
         def set_info(self, info=None):
             if info is not None:
@@ -134,6 +138,9 @@ class Item(object):
                     self.info['title'] = self.title
                     self.info['touched'] = self.__touched()
                     self.info['lastrevid'] = self.__lastrevid()
+
+            if self.info == INFO:
+                self.info = None
 
     class Data(Entity):
 
@@ -184,7 +191,8 @@ class Item(object):
             if not page_id:
                 page_id = self.__get_page_id_from_API()
 
-            return page_id
+            if page_id:
+                return page_id
 
         def __touched(self):
             touched = isinstance(self.ItemPage, pywikibot.ItemPage) and \
@@ -194,8 +202,10 @@ class Item(object):
                             replace('T','').replace('Z','')
 
         def __lastrevid(self):
-            return isinstance(self.ItemPage, pywikibot.ItemPage) and \
-                        self.ItemPage.latestRevision()
+            lastrevid = isinstance(self.ItemPage, pywikibot.ItemPage) and \
+                            self.ItemPage.latestRevision()
+            if lastrevid:
+                return lastrevid
 
         def set_info(self, info=None):
             if info is not None:
@@ -214,6 +224,9 @@ class Item(object):
                     self.info['title'] = self.title
                     self.info['touched'] = self.__touched()
                     self.info['lastrevid'] = self.__lastrevid()
+
+            if self.info == INFO:
+                self.info = None
 
         def get_codes(self):
 
@@ -257,8 +270,13 @@ class Item(object):
 
     def set_page_name(self):
         if not self.page.name:
-            self.page.name = self.data.data['sitelinks']['itwiki']
-            self.page.set_info()
+            try:
+                self.page.name = self.data.data['sitelinks']['itwiki']
+            except Exception as e:
+                logger.error(e)
+
+            if self.page.name:
+                self.page.set_info()
 
     def set_data_name(self):
         if not self.data.name:        

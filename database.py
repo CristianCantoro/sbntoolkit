@@ -49,13 +49,15 @@ def create():
                            Pages(id BIGINT PRIMARY KEY, 
                                  title TEXT,
                                  touched BIGINT, 
-                                 latest BIGINT)
+                                 latest BIGINT,
+                                 linked TEXT)
                         """)
             cur.execute("""CREATE TABLE 
-                           Data(id BIGINT PRIMARY KEY, 
+                           Data(id BIGINT PRIMARY KEY,
                                 title TEXT,
                                 touched BIGINT, 
-                                latest BIGINT)
+                                latest BIGINT,
+                                linked TEXT)
                         """)
     except sqlite.OperationalError as error:
         logger.error(error)
@@ -71,7 +73,7 @@ def drop():
         logger.error("rm exited with status: {}".format(status))
         logger.error(output)
 
-def write_codes(code_name, code_value, page=None, data=None):
+def write_codes(code_name, code_value, page=None, data=None, linked=None):
 
     logger.debug('value: %s' %(code_value and (page or data)) )
 
@@ -146,19 +148,22 @@ def write_codes(code_name, code_value, page=None, data=None):
                                  {table}(id,
                                          title,
                                          touched,
-                                         latest
+                                         latest,
+                                         linked
                                         )
                                  VALUES({id}, 
                                         "{title}",
                                         {touched},
-                                        {latest}
+                                        {latest},
+                                        {linked}
                                        )
                               """.format(
                                   table=s,
                                   id=datum['pageid'] or 'NULL',
                                   title=datum['title'].encode('utf-8') or 'NULL',
                                   touched=datum['touched'] or 'NULL',
-                                  latest=datum['lastrevid'] or 'NULL'
+                                  latest=datum['lastrevid'] or 'NULL',
+                                  linked=linked or 'NULL'
                                  )
                   try:
                       with con:
