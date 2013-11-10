@@ -5,9 +5,7 @@ import argparse
 import logging
 import requests
 import os
-import sys
 from csvunicode import UnicodeWriter, UnicodeReader
-import wikipedia_template_parser as wtp
 from subprocess import Popen, PIPE
 
 import database
@@ -27,50 +25,100 @@ AVAILABLE_PROPERTIES = set(['P396', 'P214', 'P244'])
 # logging
 logger = logging.getLogger('sbnredirect.item')
 
-# https://www.wikidata.org/w/api.php?\
-# action=query\
-# generator=backlinks
-# gbltitle=Property:P396
-# prop=info
-# gbnamespace=0
-def get_items_with_property(prop, gblcontinue=None):
+def pages_with_template(template, lang='en', geicontinue=None):
     """
-    Given a page title and the language returns page info of the latest
-    revision of the page
+    Returns a list of pages that use the given template
     """
-    url = 'http://www.wikidata.org/w/api.php'
+    url = 'http://{}.wikipedia.org/w/api.php'.format(lang)
 
     params = {
         'action': 'query',
-        'generator': 'backlinks',
+        'generator': 'embeddedin',
+        'geititle': template,
+        'geilimit': 500,
+        'geinamespace': 0,
         'prop': 'info',
-        'gbltitle': 'Property:{}'.format(prop),
-        'gblnamespace': 0,
-        'redirects': True,
-        'gbllimit': 500,
         'format': 'json'
     }
 
-    if gblcontinue:
-        params['gblcontinue'] = gblcontinue
+
+    geic_pre = geicontinue
+    logger.debug('geic_pre: {}'.format(geic_pre))
+
+    if geic_pre:
+        params['geicontinue'] = geic_pre
 
     res = requests.get(url, params=params)
 
     if not res.ok:
         res.raise_for_status()
 
-    pages = res.json()['query']['pages']
-    result = [pages[page] for page in pages]
-
+    geic_post = None
     try:
-        gblcontinue = res.json()['query-continue']['backlinks']['gblcontinue']
+        geic_post = res.json()['query-continue']['embeddedin']['geicontinue']
     except KeyError:
-        gblcontinue = None
+        pass
 
-    if gblcontinue:
-        result += get_items_with_property(prop, gblcontinue)
+    logger.debug('geic_post: {}'.format(geic_post))
 
-    return result
+    pages = []
+    try:
+        pages = res.json()['query']['pages']
+    except KeyError:
+        pass
+
+    for page in pages:
+        yield pages[page]
+
+    if geic_post:
+        for item in pages_with_template(template, lang, geic_post):
+            yield item
+
+def get_items_with_property(property_, gblcontinue=None):
+    """
+    Given a page title and the language returns page info of the latest
+    revision of the page
+    """
+
+    url = 'http://www.wikidata.org/w/api.php'
+
+    params = {
+        'action': 'query',
+        'generator': 'backlinks',
+        'prop': 'info',
+        'gbltitle': 'Property:{}'.format(property_),
+        'gblnamespace': 0,
+        'redirects': True,
+        'gbllimit': 500,
+        'format': 'json'
+    }
+
+    gblc_pre = gblcontinue
+    logger.debug('gblc_pre: {}'.format(gblc_pre))
+
+    if gblc_pre:
+        params['gblcontinue'] = gblc_pre
+
+    res = requests.get(url, params=params)
+
+    if not res.ok:
+        res.raise_for_status()
+
+    gblc_post = None
+    try:
+        gblc_post = res.json()['query-continue']['backlinks']['gblcontinue']
+    except KeyError:
+        pass
+
+    logger.debug('gblc_post: {}'.format(gblc_post))
+
+    pages = res.json()['query']['pages']
+    for page in pages:
+        yield pages[page]
+
+    if gblc_post:
+        for item in get_items_with_property(property_, gblc_post):
+            yield item
 
 def get_items_to_update(table, items):
     logger.debug('no. of items: {no}'.format(no=len(items)))
@@ -266,12 +314,13 @@ def read_items_to_update(filename=None):
             os.stat(update_filename).st_size == 0:
         get_items(pedia=True, data=True)
         items_to_update = get_all_items_to_update()
+        yield (i for i in items_to_update)
 
-    try:
-        with open(update_filename, 'r') as upin:
-            reader = UnicodeReader(upin)
-
-            items_to_update = [dict(zip(OUT_FIELDS, r)) for r in reader][1:]
+    with open(update_filename, 'r') as upin:
+        reader = UnicodeReader(upin)
+        reader.next()
+        for r in reader:
+            yield dict(zip(OUT_FIELDS, r))
 
             # dedup list
             # dl = [dict(zip(OUT_FIELDS, r)) for r in reader][1:]            
@@ -279,10 +328,26 @@ def read_items_to_update(filename=None):
             #                    for t in set([tuple(d.items()) for d in dl])
             #                   ]
 
-    except Exception as e:
-        logger.error(e)
+def _test_with_wikidataquery(p):
+    gen_set = set([int(item['title'].replace('Q',''))
+                   for item in get_items_with_property(p)])
+    print len(gen_set)
 
-    return items_to_update
+    url = 'http://208.80.153.172/api'
+    params = {
+        'q': 'claim[{}]'.format(p.replace('P',''))
+    }
+
+    res = requests.get(url, params=params)
+
+    if not res.ok:
+        res.raise_for_status()
+
+    wdq_set = set(res.json()['items'])
+
+    import pdb
+    pdb.set_trace()
+    return wdq_set == gen_set
 
 if __name__ == '__main__':
     # logging
@@ -325,10 +390,12 @@ if __name__ == '__main__':
     print args
 
     # print
-    # items = get_items_with_property('P396')
-    # # print items
-    # del items
+    # print _test_with_wikidataquery('P396')
     # print
+    # print _test_with_wikidataquery('P244')
+    # print
+    # for page in pages_with_template('Template:Giove', 'it'):
+    #     print page
 
     if args.drop:
         drop(WIKIPEDIA_OUTPUT)
