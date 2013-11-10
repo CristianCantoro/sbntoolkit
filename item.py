@@ -157,8 +157,10 @@ class Item(object):
 
         @property
         def id(self):
-            return isinstance(self.ItemPage, pywikibot.ItemPage) and \
-                    self.ItemPage.id
+            pageid = (isinstance(self.ItemPage, pywikibot.ItemPage) and \
+                      self.ItemPage.id)
+            if pageid:
+                return pageid
 
         def set_ItemPage(self):
             if not self.ItemPage:
