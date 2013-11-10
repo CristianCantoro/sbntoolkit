@@ -152,18 +152,22 @@ def write_codes(code_name, code_value, page=None, data=None, linked=None):
                                          linked
                                         )
                                  VALUES({id}, 
-                                        "{title}",
+                                        {title},
                                         {touched},
                                         {latest},
-                                        "{linked}"
+                                        {linked}
                                        )
                               """.format(
                                   table=s,
                                   id=datum['pageid'] or 'NULL',
-                                  title=datum['title'].encode('utf-8') or 'NULL',
+                                  title="{}".format(
+                                              datum['title'].encode('utf-8')) \
+                                        or 'NULL',
                                   touched=datum['touched'] or 'NULL',
                                   latest=datum['lastrevid'] or 'NULL',
-                                  linked=(linked and linked.encode('utf-8')) or 'NULL'
+                                  linked=(linked and \
+                                          "{}".format(linked.encode('utf-8')))
+                                          or 'NULL'
                                  )
                   try:
                       with con:
