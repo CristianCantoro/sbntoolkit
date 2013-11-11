@@ -43,7 +43,7 @@ def pages_with_template(template, lang='en', geicontinue=None):
 
 
     geic_pre = geicontinue
-    logger.debug('geic_pre: {}'.format(geic_pre))
+    logger.debug('geic_pre: {}'.format(geic_pre and geic_pre.encode('utf-8')))
 
     if geic_pre:
         params['geicontinue'] = geic_pre
@@ -59,7 +59,7 @@ def pages_with_template(template, lang='en', geicontinue=None):
     except KeyError:
         pass
 
-    logger.debug('geic_post: {}'.format(geic_post))
+    logger.debug('geic_post: {}'.format(geic_post and geic_post.encode('utf-8')))
 
     pages = []
     try:
@@ -94,7 +94,7 @@ def get_items_with_property(property_, gblcontinue=None):
     }
 
     gblc_pre = gblcontinue
-    logger.debug('gblc_pre: {}'.format(gblc_pre))
+    logger.debug('gblc_pre: {}'.format(gblc_pre and gblc_pre.encode('utf-8')))
 
     if gblc_pre:
         params['gblcontinue'] = gblc_pre
@@ -110,7 +110,7 @@ def get_items_with_property(property_, gblcontinue=None):
     except KeyError:
         pass
 
-    logger.debug('gblc_post: {}'.format(gblc_post))
+    logger.debug('gblc_post: {}'.format(gblc_post and gblc_post.encode('utf-8')))
 
     pages = res.json()['query']['pages']
     for page in pages:
@@ -219,11 +219,10 @@ def get_wikipedia_pages_from_api():
     pages = []
 
     try:
-        pages = wtp.pages_with_template(
+        pages = pages_with_template(
                     "Template:Controllo_di_autorità",
-                    lang="it",
-                    props=True
-                )
+                    lang="it"
+                   )
     except Exception as e:
         logger.error(e)
 
