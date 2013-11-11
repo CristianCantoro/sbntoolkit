@@ -62,10 +62,7 @@ class Item(object):
 
         @property
         def id(self):
-            pageid = (isinstance(self.WikiPage, pywikibot.Page) and \
-                        self.WikiPage._pageid)
-            if pageid:
-                return pageid
+            return self.name
 
         def set_WikiPage(self):
             if not self.WikiPage:
@@ -123,6 +120,12 @@ class Item(object):
             if lastrevid:
                return lastrevid
 
+        def __pageid(self):
+            pageid = (isinstance(self.WikiPage, pywikibot.Page) and \
+                      self.WikiPage._pageid)
+            if pageid:
+                return pageid
+
         def set_info(self, info=None):
             if info is not None:
                 self.info = INFO.copy()
@@ -135,7 +138,7 @@ class Item(object):
             else:
                 if not self.info or not self.info['pageid']:
                     self.info = INFO.copy()
-                    self.info['pageid'] = self.id
+                    self.info['pageid'] = self.__pageid()
                     self.info['title'] = self.title
                     self.info['touched'] = self.__touched()
                     self.info['lastrevid'] = self.__lastrevid()
