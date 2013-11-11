@@ -93,15 +93,16 @@ def save_authority_codes(items):
         wikipedia_codes = item.page.get_codes()
 
         for code in wikipedia_codes:
-            database.write_codes(code, wikipedia_codes[code], 
-                                 page=item.page.info,
-                                 linked=item.data.name)
+            database.write_codes(code, wikipedia_codes[code],
+                                 pageid=item.page.info and \
+                                            item.page.info['pageid'])
 
         for code in wikidata_codes:
             database.write_codes(code, wikidata_codes[code], 
-                                 data=item.data.info,
-                                 linked=item.page.name)
+                                 dataid=item.data.info and \
+                                            item.data.info['pageid'])
 
+        database.write_info(page=item.page.info, data=item.data.info)
 if __name__ == '__main__':
 
     logger.setLevel(logging.ERROR)

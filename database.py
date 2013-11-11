@@ -50,14 +50,14 @@ def create():
                                  title TEXT,
                                  touched BIGINT, 
                                  latest BIGINT,
-                                 linked TEXT)
+                                 linked BIGINT)
                         """)
             cur.execute("""CREATE TABLE 
                            Data(id BIGINT PRIMARY KEY,
                                 title TEXT,
                                 touched BIGINT, 
                                 latest BIGINT,
-                                linked TEXT)
+                                linked BIGINT)
                         """)
     except sqlite.OperationalError as error:
         logger.error(error)
@@ -73,55 +73,48 @@ def drop():
         logger.error("rm exited with status: {}".format(status))
         logger.error(output)
 
-def write_codes(code_name, code_value, page=None, data=None, linked=None):
+def write_codes(code_name, code_value, pageid=None, dataid=None):
 
     # logger.debug('value: %s' %(code_value and (page or data)) )
-
-    if code_value and (page or data):
+    if code_value and (pageid or dataid):
         con = sqlite.connect(DATABASE)
 
-        if page is None:
-            page = {}
-
-        if data is None:
-            data = {}
-
         query = None
-        if page.get('pageid', None):
-          query = """INSERT OR REPLACE INTO
-                         {code_name}(code,
-                                     page_id,
-                                     data_id
-                                    )
-                          VALUES("{code_value}", 
-                                 {page_id},
-                                 (SELECT data_id 
-                                  FROM {code_name} 
-                                  WHERE code = "{code_value}")
-                               )
-                  """.format(
-                      code_name=code_name,
-                      code_value=code_value,
-                      page_id=page['pageid']
-                     )
+        if pageid:
+            query = """INSERT OR REPLACE INTO
+                        {code_name}(code,
+                                    page_id,
+                                    data_id
+                                   )
+                        VALUES("{code_value}", 
+                                {page_id},
+                               (SELECT data_id 
+                                FROM {code_name} 
+                                WHERE code = "{code_value}")
+                              )
+                    """.format(
+                            code_name=code_name,
+                            code_value=code_value,
+                            page_id=pageid and '"{}"'.format(pageid) or 'NULL'
+                           )
 
-        if data.get('pageid', None):
-          query = """INSERT OR REPLACE INTO
-               {code_name}(code,
-                           page_id,
-                           data_id
-                          )
-                VALUES("{code_value}", 
-                       (SELECT page_id 
-                        FROM {code_name} 
-                        WHERE code = "{code_value}"),
-                       {data_id}
-                     )
-                """.format(
-                    code_name=code_name,
-                    code_value=code_value,
-                    data_id=data['pageid']
-                   )
+        if dataid:
+            query = """INSERT OR REPLACE INTO
+                        {code_name}(code,
+                                    page_id,
+                                    data_id
+                                   )
+                        VALUES("{code_value}", 
+                               (SELECT page_id 
+                                FROM {code_name} 
+                                WHERE code = "{code_value}"),
+                                {data_id}
+                              )
+                    """.format(
+                            code_name=code_name,
+                            code_value=code_value,
+                            data_id=dataid and '"{}"'.format(dataid) or 'NULL'
+                           )
         
         if query:  
           # logger.debug(query)
@@ -135,50 +128,54 @@ def write_codes(code_name, code_value, page=None, data=None, linked=None):
               logger.error(query)
               logger.error(e)
 
-          con = sqlite.connect(DATABASE)
+def write_info(page, data):
+    con = sqlite.connect(DATABASE)
 
-          sources = {'Pages': page, 'Data': data}
+    sources = {'Pages': page, 'Data': data}
 
-          for s in sources:
-              datum = sources[s]
-              # logger.debug('{s}: {datum}'.format(s=s, datum=datum))
-              if datum:
+    for s in sources:
+        datum = sources[s]
+        # logger.debug('{s}: {datum}'.format(s=s, datum=datum))
+        if datum:
 
-                  query = """INSERT OR REPLACE INTO 
-                                 {table}(id,
-                                         title,
-                                         touched,
-                                         latest,
-                                         linked
-                                        )
-                                 VALUES({id}, 
-                                        {title},
-                                        {touched},
-                                        {latest},
-                                        {linked}
-                                       )
-                              """.format(
-                                  table=s,
-                                  id=datum['pageid'] or 'NULL',
-                                  title="{}".format(
-                                              datum['title'].encode('utf-8')) \
-                                        or 'NULL',
-                                  touched=datum['touched'] or 'NULL',
-                                  latest=datum['lastrevid'] or 'NULL',
-                                  linked=(linked and \
-                                          "{}".format(linked.encode('utf-8')))
-                                          or 'NULL'
-                                 )
-                  try:
-                      with con:
-                          cur = con.cursor()
+            linked = None
+            if s == 'Pages':
+                linked = data and data['pageid']
+            else:
+                linked = page and page['pageid']
 
-                          cur.execute(query)
-                  except Exception as e:
-                      logger.error("Insertion into {table} failed".format(
-                          table=s))
-                      logger.error(query)
-                      logger.error(e)
+            query = """INSERT OR REPLACE INTO 
+                            {table}(id,
+                                    title,
+                                    touched,
+                                    latest,
+                                    linked
+                                   )
+                            VALUES({id}, 
+                                   {title},
+                                   {touched},
+                                   {latest},
+                                   {linked}
+                                  )
+                    """.format(
+                            table=s,
+                            id=datum['pageid'] or 'NULL',
+                            title='"{}"'.format(
+                                        datum['title'].encode('utf-8')) \
+                                   or 'NULL',
+                            touched=datum['touched'] or 'NULL',
+                            latest=datum['lastrevid'] or 'NULL',
+                            linked=linked or 'NULL'
+                           )
+        try:
+            with con:
+                cur = con.cursor()
+
+                cur.execute(query)
+        except Exception as e:
+            logger.error("Insertion into {table} failed".format(table=s))
+            logger.error(query)
+            logger.error(e)
 
 
 FIELDS = ("id", "title", "touched", "latest")
