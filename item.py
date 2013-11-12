@@ -241,22 +241,25 @@ class Item(object):
 
             self.codes = CODES.copy()
 
-            if isinstance(self.ItemPage, pywikibot.ItemPage):
+            try:
+                if isinstance(self.ItemPage, pywikibot.ItemPage):
 
-                # VIAF identifier is Property:P214
-                if 'P214' in self.ItemPage.claims:  
-                    self.codes['viaf'] = self.ItemPage.claims['P214'][0].\
-                                            getTarget()
+                    # VIAF identifier is Property:P214
+                    if 'P214' in self.ItemPage.claims: 
+                        self.codes['viaf'] = self.ItemPage.claims['P214'][0].\
+                                                getTarget()
 
-                # SBN identifier is Property:P396
-                if 'P396' in self.ItemPage.claims:
-                    self.codes['sbn'] = self.ItemPage.claims['P396'][0].\
-                                            getTarget()
+                    # SBN identifier is Property:P396
+                    if 'P396' in self.ItemPage.claims:
+                        self.codes['sbn'] = self.ItemPage.claims['P396'][0].\
+                                                getTarget()
 
-                #LCCN identifier is Property:P244
-                if 'P244' in self.ItemPage.claims:
-                    self.codes['lccn'] = self.ItemPage.claims['P244'][0].\
-                                            getTarget()
+                    #LCCN identifier is Property:P244
+                    if 'P244' in self.ItemPage.claims:
+                        self.codes['lccn'] = self.ItemPage.claims['P244'][0].\
+                                                getTarget()
+            except Exception as e:
+                logger.error(e)
 
             return self.codes
 
