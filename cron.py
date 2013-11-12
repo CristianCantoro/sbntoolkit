@@ -36,7 +36,7 @@ def get_items_with_info(items):
     for item in items:
 
         itemobj = None
-        logger.debug('Processing {}'.format(item['title']))
+        logger.debug('Processing {}'.format(item['title'].encode('utf-8')))
 
         if item['source']== 'data':
             # Wikidata item
@@ -64,7 +64,7 @@ def get_items_from_cli(items):
     for itemname in items:
 
         itemobj = None
-        logger.debug('Processing {}'.format(itemname))
+        logger.debug('Processing {}'.format(itemname).encode('utf-8'))
 
         if itemname.startswith('data:') or itemname.startswith('wikidata:'):
             # Wikidata item
@@ -87,7 +87,7 @@ def get_items_from_cli(items):
 def save_authority_codes(items):
 
     for item in items:
-        logger.debug("processing {}".format(item))
+        logger.debug("processing {}".format(item).encode('utf-8'))
 
         wikidata_codes = item.data.get_codes()
         wikipedia_codes = item.page.get_codes()
