@@ -1,25 +1,29 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import logging
 import sqlite3 as sqlite
 from subprocess import Popen, PIPE
 
-# global
-DATABASE = 'sbnredirect.db'
 
 # logging
 logger = logging.getLogger('sbnredirect.database')
 
-# SELECT page_id, page_title, page_touched, page_latest, page_len FROM pagelinks, page 
-# WHERE pl_title="Controllo_di_autorità" AND page_id=pl_from AND page_namespace=0 
-# LIMIT 10;
-# query = """ SELECT page_id, page_title, page_touched, page_latest, page_len
-#         FROM pagelinks, page 
-#         WHERE pl_title="Controllo_di_autorità" 
-#             AND page_id=pl_from 
-#             AND page_namespace=0 
-#         """
+
+# global
+DBNAME = 'sbnredirect.db'
+
+if __name__ == '__main__':
+    DATABASE = DBNAME
+
+else:
+    # DBPATH = os.path.dirname(os.path.realpath(__file__))
+    DBPATH = "/home/cristian/Scrivania/sbnt/sbntoolkit"
+    DATABASE = os.path.join(DBPATH, DBNAME)
+    logger.debug(DATABASE)
+
+print DATABASE
 
 def _quote(string):
     if isinstance(string, str) or isinstance(string, unicode):
@@ -172,26 +176,26 @@ def write_info(page, data):
                             latest=datum['lastrevid'] or 'NULL',
                             linked=linked or 'NULL'
                            )
-        try:
-            with con:
-                cur = con.cursor()
+            try:
+                with con:
+                    cur = con.cursor()
+                    cur.execute(query)
+            except Exception as e:
+                logger.error("Insertion into {table} failed".format(table=s))
+                logger.error(query)
+                logger.error(e)
 
-                cur.execute(query)
-        except Exception as e:
-            logger.error("Insertion into {table} failed".format(table=s))
-            logger.error(query)
-            logger.error(e)
 
-
-FIELDS = ("id", "title", "touched", "latest")
-
-def query(table, page_id):
+def query_id(table, page_id):
+    fields = ("id", "title", "touched", "latest")
     con = sqlite.connect(DATABASE)
 
-    query = """SELECT id, title, touched, latest
+    query = """SELECT {fields}
                FROM {table}
                WHERE id = '{page_id}'
-            """.format(table=table, page_id=page_id)
+            """.format(fields=', '.join(fields),
+                       table=table,
+                       page_id=page_id)
 
     # logger.debug(query)
     data = None
@@ -201,13 +205,81 @@ def query(table, page_id):
             cur.execute(query)
             data = cur.fetchone()
     except Exception as e:
-        logger.error("Retrieval of code {page_id} from table {table} failed"\
-                     .format(page_id=page_id))
+        logger.error("Retrieval of id {page_id} from table {table} failed"\
+                     .format(page_id=page_id, table=table))
         logger.error(query)
         logger.error(e)
 
     if data:
-        data = dict(zip(FIELDS, data))
+        data = dict(zip(fields, data))
+
+    return data
+
+def query_code(codename, code):
+    fields = ("code", "page_id", "data_id")
+    con = sqlite.connect(DATABASE)
+
+    query = """SELECT {fields}
+               FROM {table}
+               WHERE code = '{code}'
+            """.format(fields=', '.join(fields),
+                       table=codename,
+                       code=code
+                      )
+
+    # logger.debug(query)
+    data = None
+    try:
+        with con:
+            cur = con.cursor()
+            cur.execute(query)
+            data = cur.fetchone()
+    except Exception as e:
+        logger.error("Retrieval of code {code} from table {table} failed"\
+                     .format(code=code, table=codename))
+        logger.error(query)
+        logger.error(e)
+
+    if data:
+        data = dict(zip(fields, data))
+
+    return data
+
+
+def  retrieve_from(code_type, res_type, code):
+    fields = ('code', 'page_id', 'data_id', 'title', 'linked')
+    con = sqlite.connect(DATABASE)
+
+    if res_type == 'data':
+        res_type_id = 'data_id'
+    else:
+        res_type_id = 'page_id'
+        
+    query = """SELECT {fields}
+               FROM {code_type}, {res_type} 
+               WHERE {res_type}.id = {res_type_id} AND code='{code}';
+            """.format(fields=', '.join(fields),
+                       code_type=code_type,
+                       res_type=res_type,
+                       res_type_id=res_type_id,
+                       code=code
+                      )
+    # logger.debug(query)
+    data = None
+    try:
+        with con:
+            cur = con.cursor()
+            cur.execute(query)
+            data = cur.fetchone()
+    except Exception as e:
+        logger.error("Retrieval of code {code} ({code_type}) from "\
+                     "table {table} failed"\
+                     .format(code=code, code_type=code_type, table=res_type))
+        logger.error(query)
+        logger.error(e)
+
+    if data:
+        data = dict(zip(fields, data))
 
     return data
 
