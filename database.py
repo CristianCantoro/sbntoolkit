@@ -21,6 +21,11 @@ logger = logging.getLogger('sbnredirect.database')
 #             AND page_namespace=0 
 #         """
 
+def _quote(string):
+    if isinstance(string, str) or isinstance(string, unicode):
+        string = string.replace("'","''")
+    return "'{}'".format(string)
+
 def create():
     con = sqlite.connect(DATABASE)
 
@@ -86,16 +91,16 @@ def write_codes(code_name, code_value, pageid=None, dataid=None):
                                     page_id,
                                     data_id
                                    )
-                        VALUES("{code_value}", 
+                        VALUES('{code_value}',
                                 {page_id},
                                (SELECT data_id 
                                 FROM {code_name} 
-                                WHERE code = "{code_value}")
+                                WHERE code = '{code_value}')
                               )
                     """.format(
                             code_name=code_name,
                             code_value=code_value,
-                            page_id=pageid and '"{}"'.format(pageid) or 'NULL'
+                            page_id=pageid and _quote(pageid) or 'NULL'
                            )
 
         if dataid:
@@ -104,16 +109,16 @@ def write_codes(code_name, code_value, pageid=None, dataid=None):
                                     page_id,
                                     data_id
                                    )
-                        VALUES("{code_value}", 
+                        VALUES('{code_value}',
                                (SELECT page_id 
                                 FROM {code_name} 
-                                WHERE code = "{code_value}"),
+                                WHERE code = '{code_value}'),
                                 {data_id}
                               )
                     """.format(
                             code_name=code_name,
                             code_value=code_value,
-                            data_id=dataid and '"{}"'.format(dataid) or 'NULL'
+                            data_id=dataid and _quote(dataid) or 'NULL'
                            )
         
         if query:  
@@ -160,7 +165,7 @@ def write_info(page, data):
                     """.format(
                             table=s,
                             id=datum['pageid'] or 'NULL',
-                            title='"{}"'.format(
+                            title= _quote(
                                         datum['title'].encode('utf-8')) \
                                    or 'NULL',
                             touched=datum['touched'] or 'NULL',
@@ -185,7 +190,7 @@ def query(table, page_id):
 
     query = """SELECT id, title, touched, latest
                FROM {table}
-               WHERE id = "{page_id}"
+               WHERE id = '{page_id}'
             """.format(table=table, page_id=page_id)
 
     # logger.debug(query)
