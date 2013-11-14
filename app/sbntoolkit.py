@@ -19,7 +19,7 @@ SBNtoolkit = Bottle()
 
 @SBNtoolkit.get('/')
 def get_index(data=None):
-  return static_file('index.html', root='static/')
+  return static_file('index.html', root='app/static/')
 
 @SBNtoolkit.route('/github')
 def github():
@@ -27,19 +27,19 @@ def github():
 
 @SBNtoolkit.route('/css/<css_file>')
 def serve_css(css_file):
-  return static_file(css_file, root='static/css')
+  return static_file(css_file, root='app/static/css')
 
 @SBNtoolkit.route('/images/<filepath:path>')
 def serve_images(filepath):
-  return static_file(filepath, root='static/images')
+  return static_file(filepath, root='app/static/images')
 
 @SBNtoolkit.route('/favicon.ico')
 def serve_favicon():
-  return static_file('favicon.ico', root='static/')
+  return static_file('favicon.ico', root='app/static/')
 
 @SBNtoolkit.route('/js/<filepath:path>')
 def serve_js(filepath):
-  return static_file(filepath, root='static/js')
+  return static_file(filepath, root='app/static/js')
 
 
 def code_filter(config):
