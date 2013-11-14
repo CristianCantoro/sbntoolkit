@@ -46,6 +46,73 @@ def retrieve_link(lang, code_type, code):
             if linked:
                 return database.query_id(res_type, linked)['title']
 
+def viaf_and_nosbn_in_itwiki(offset=None, perpage=None):
+    fields = ('viaf.code',
+              'viaf.page_id',
+              'viaf.data_id',
+              'data.title',
+              'data.linked',
+              'pages.title'
+             )
+
+    if not isinstance(offset, int):
+        offset = 0
+
+    if not isinstance(perpage, int):
+        perpage = 500
+
+    query = """
+            SELECT {fields}
+            FROM viaf, data, pages
+            WHERE data.id = viaf.data_id
+                AND viaf.data_id NOT NULL
+                AND data.linked NOT NULL
+                AND viaf.data_id NOT IN
+                    (SELECT DISTINCT sbn.data_id
+                     FROM sbn
+                     WHERE data_id NOT NULL)
+                AND pages.id = data.linked
+            LIMIT {perpage}
+            OFFSET {offset}
+            """.format(fields=', '.join(fields),
+                       offset=offset,
+                       perpage=perpage
+                      )
+
+    data = database.query(query)
+
+    items = [dict(zip(fields, d)) for d in data]
+
+    query = """
+            SELECT count(*)
+            FROM viaf, data, pages
+            WHERE data.id = viaf.data_id
+                AND viaf.data_id NOT NULL
+                AND data.linked NOT NULL
+                AND viaf.data_id NOT IN
+                    (SELECT DISTINCT sbn.data_id
+                     FROM sbn
+                     WHERE data_id NOT NULL)
+                AND pages.id = data.linked
+            """.format(fields=', '.join(fields))
+
+    res = database.query(query)
+
+    tot = 0
+    try:
+        tot = res[0][0]
+    except:
+        pass
+
+    items = tot, [dict(zip(fields, d)) for d in data]
+
+
+    # import pdb
+    # pdb.set_trace()
+
+    return items
+
+
 if __name__ == '__main__':
     # logging
     LOGFORMAT_STDOUT = {logging.DEBUG: '%(module)s:%(funcName)s:%(lineno)s - %(levelname)-8s: %(message)s',

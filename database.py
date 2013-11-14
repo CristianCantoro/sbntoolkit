@@ -245,6 +245,23 @@ def query_code(codename, code):
 
     return data
 
+def query(query):
+    con = sqlite.connect(DATABASE)
+
+    logger.debug(query)
+    data = None
+    try:
+        with con:
+            cur = con.cursor()
+            cur.execute(query)
+            data = cur.fetchall()
+    except Exception as e:
+        logger.error("Execution of query failed.")
+        logger.error(query)
+        logger.error(e)
+
+    return data
+
 
 def  retrieve_from(code_type, res_type, code):
     fields = ('code', 'page_id', 'data_id', 'title', 'linked')

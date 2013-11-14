@@ -186,3 +186,24 @@ input.text:focus {
     bottom: 0;
     float: left;
 }
+
+div.pager {
+    text-align: center;
+    margin: 1em 0;
+}
+
+div.pager span {
+    display: inline-block;
+    width: 1.8em;
+    height: 1.8em;
+    line-height: 1.8;
+    text-align: center;
+    cursor: pointer;
+    background: #ccc;
+    color: #000;
+    margin-right: 0.5em;
+}
+
+div.pager span.active {
+    background: #c00;
+}

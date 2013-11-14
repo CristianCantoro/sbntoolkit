@@ -8,12 +8,41 @@ from bottle import static_file
 from bottle import error
 from bottle import template
 from bottle import TEMPLATE_PATH
+from bottle import request
 
 import os
+import logging
+import math
 from urlparse import urljoin
 
-from code import retrieve_link
+from code import retrieve_link, viaf_and_nosbn_in_itwiki
 
+# logging
+# logging
+LOGFORMAT_STDOUT = {logging.DEBUG: '%(module)s:%(funcName)s:%(lineno)s - %(levelname)-8s: %(message)s',
+                    logging.INFO: '%(levelname)-8s: %(message)s',
+                    logging.WARNING: '%(levelname)-8s: %(message)s',
+                    logging.ERROR: '%(levelname)-8s: %(message)s',
+                    logging.CRITICAL: '%(levelname)-8s: %(message)s'
+                    }
+
+# --- root logger
+rootlogger = logging.getLogger('sbnredirect')
+rootlogger.setLevel(logging.DEBUG)
+
+lvl_config_logger = logging.DEBUG
+
+console = logging.StreamHandler()
+console.setLevel(lvl_config_logger)
+
+formatter = logging.Formatter(LOGFORMAT_STDOUT[lvl_config_logger])
+console.setFormatter(formatter)
+
+rootlogger.addHandler(console)
+
+logger = logging.getLogger('sbnredirect.app')
+
+# global
 DOMAIN = 'http://baliststaging.es'
 
 GITHUB = 'http://github.com/CristianCantoro'
@@ -33,22 +62,24 @@ def get_index(data=None):
 def github():
     redirect(GITHUB)
 
+@SBNtoolkit.route('/sbnt/css/<css_file>')
 @SBNtoolkit.route('/css/<css_file>')
 def serve_css(css_file):
   return static_file(css_file, root='app/static/css')
 
+@SBNtoolkit.route('/sbnt/images/<filepath:path>')
 @SBNtoolkit.route('/images/<filepath:path>')
 def serve_images(filepath):
   return static_file(filepath, root='app/static/images')
 
-@SBNtoolkit.route('/favicon.ico')
-def serve_favicon():
-  return static_file('favicon.ico', root='app/static/')
-
+@SBNtoolkit.route('/sbnt/js/<filepath:path>')
 @SBNtoolkit.route('/js/<filepath:path>')
 def serve_js(filepath):
   return static_file(filepath, root='app/static/js')
 
+@SBNtoolkit.route('/favicon.ico')
+def serve_favicon():
+  return static_file('favicon.ico', root='app/static/')
 
 def code_filter(config):
     ''' Matches a IT\ICCU\ code'''
@@ -114,9 +145,78 @@ def download(filepath=None):
     else:
         redirect(urljoin(DOMAIN,'download'))
 
+@SBNtoolkit.get('/list')
+def get_list(filepath=None):
+
+    p = request.query.get('p')
+
+    logger.debug('p: {}'.format(p))
+
+    page = 0
+    try:
+        if p:
+            page = int(p) - 1
+    except:
+        logger.error(p)
+
+    items_per_page = 500
+
+    offset = page*items_per_page
+
+    logger.debug('page: {}'.format(page))
+    logger.debug('offset: {}'.format(offset))
+
+    tot_items, items = viaf_and_nosbn_in_itwiki(offset=offset,
+                                                        perpage=items_per_page
+                                                       )
+
+
+    item_list = []
+    for item in items:
+        code = item['viaf.code']
+        page_id = item['viaf.page_id']
+        item_id = item['viaf.data_id']
+        wikipedia_link = WIKIPEDIA.format(lang='it',
+                                   page=item['pages.title'].encode('utf-8')
+                                  )
+        wikipedia_title = '<a href="{link}">{title}</a>'.format(
+                            link=wikipedia_link,
+                            title=item['pages.title'].encode('utf-8')
+                           )
+        wikidata_link = WIKIDATA.format(item=item['data.title'])
+        wikidata_title = '<a href="{link}">{title}</a>'.format(
+                            link=wikidata_link,
+                            title=item['data.title']
+                           )
+        linked = item['data.linked']
+
+        item_list.append([code, page_id, wikidata_title,
+                          wikipedia_title, item_id, linked])
+
+    tot_pages = int(math.ceil(tot_items/float(items_per_page)))
+
+    logger.debug('tot_pages: {}'.format(tot_pages))
+
+    logger.debug(len(item_list))
+
+    return template('list.tpl',
+                    items=item_list,
+                    active_page=page + 1,
+                    tot_pages=tot_pages)
+
 @error(404)
 def error404(error):
     return 'Nothing here, sorry'
 
 if __name__ == '__main__':
-    run(SBNtoolkit,host='sbnredirect.it', port=8080, debug=True,reloader=True)
+
+    logger.debug('test')
+
+    if not os.path.isdir('app'):
+        basedir = os.path.dirname(os.path.realpath(__file__))
+        new_basedir = os.path.realpath(os.path.join(basedir,'..'))
+
+        os.chdir(new_basedir)
+        print 'new_basedir', new_basedir
+
+    run(SBNtoolkit,host='0.0.0.0', port=39600, debug=True,reloader=True)
