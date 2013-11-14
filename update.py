@@ -126,7 +126,7 @@ def get_items_to_update(table, items):
     items_to_get = []
     for item in items:
         item['source'] = table
-        data = database.query(table, item['pageid'])
+        data = database.query_id(table, item['pageid'])
         if data is None:
             items_to_get.append(item)
         else:
