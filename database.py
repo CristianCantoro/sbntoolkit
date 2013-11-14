@@ -13,17 +13,12 @@ logger = logging.getLogger('sbnredirect.database')
 
 # global
 DBNAME = 'sbnredirect.db'
+DBPATH = os.path.realpath(os.path.join(os.path.dirname(
+		os.path.realpath(__file__)),'..','app'))
 
-if __name__ == '__main__':
-    DATABASE = DBNAME
+DATABASE = os.path.join(DBPATH,DBNAME)
 
-else:
-    # DBPATH = os.path.dirname(os.path.realpath(__file__))
-    DBPATH = "/home/cristian/Scrivania/sbnt/sbntoolkit"
-    DATABASE = os.path.join(DBPATH, DBNAME)
-    logger.debug(DATABASE)
-
-print DATABASE
+logger.debug(DATABASE)
 
 def _quote(string):
     if isinstance(string, str) or isinstance(string, unicode):
