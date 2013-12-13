@@ -43,8 +43,9 @@
     <div id="container">
         <h1>Lista di item con codice VIAF, senza codice SBN in Wikipedia in Italiano</h1>
 
-        tot_pages: {{tot_pages}}
-        active_page: {{active_page}}
+        tot_pages: {{tot_pages}}<br />
+        active_page: {{active_page}}<br />
+        <a href="/">Torna alla pagina principale</a><br />
 
         <div class="pager">
             %for pagenum in xrange(1,tot_pages+1):
@@ -79,6 +80,8 @@
               %end
             </tbody>
         </table>
+
+    <a href="#">Torna in cima</a>
     </div>
 
 </body>

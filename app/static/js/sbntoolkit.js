@@ -1,15 +1,35 @@
-// Based on:
-// http://stackoverflow.com/questions/14186565/ ...
-//     ... jquery-hide-and-show-toggle-div-with-plus-and-minus-icon
+$(document).ready(
+    function () {
+        "use strict";
 
-$(document).ready(function(e) {
+        $('#license').click(function (e) {
+            e.preventDefault();
+            $("#license-text").slideToggle('slow');
+            return false;
+        });
 
-  $('#license').click(function(e){
-    e.preventDefault();
-    $("#license-text").slideToggle('slow');
-    return false;
-  });
+        $("#license-text").hide();
 
-  $("#license-text").hide()
-  return false;
-});
+        $(".inputform").submit(function (e) {
+
+            e.preventDefault();
+
+            var postData = $(this).serializeArray();
+
+            $('#submit').attr('disabled', 'disabled');
+
+            $.ajax({
+                type: "POST",
+                url: "/",
+                data: postData,
+                success: function (post_response) {
+                    $('#submit').removeAttr('disabled');
+                    $('#results-placeholder').hide().html(post_response).fadeIn(1500);
+                }
+            });
+
+            return false;
+        });
+
+    }
+);

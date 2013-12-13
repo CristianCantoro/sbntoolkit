@@ -52,22 +52,28 @@ a:active {
     color: #7979a7;
 }
 
+#beta {
+    color: #929292;
+    vertical-align: super;
+    font-size: .7em;
+}
+
 #premise {
-				margin-top: 25px;
-				margin-bottom: 5px;
-				width: 80%;	
+    margin-top: 25px;
+    margin-bottom: 5px;
+    width: 80%;
 }
 
 #primary-content {
-			margin-top: 25px;
-			margin-bottom: 25px;
-			padding-top: 25px;
-			padding-bottom: 25px;
+    margin-top: 25px;
+    margin-bottom: 25px;
+    padding-top: 25px;
+    padding-bottom: 25px;
 
 }
 
 .inputform {
-				margin: 5px; 
+    margin: 5px;
 }
 
 input {
@@ -92,7 +98,7 @@ input.text:focus {
 }
 
 #search {
-				width: 40%; 
+    width: 40%;
 }
 
 #result {
@@ -169,12 +175,12 @@ input.text:focus {
 }
 
 #license-text {
-		display: none;
-		background-color: #eeeeee;
-		padding: 10px 5px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  display: inline-block;
+    display: none;
+    background-color: #eeeeee;
+    padding: 10px 5px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    display: inline-block;
 }
 
 #footer {

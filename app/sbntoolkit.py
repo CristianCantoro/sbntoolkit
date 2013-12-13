@@ -55,8 +55,20 @@ TEMPLATE_PATH.append(os.path.join('app','views'))
 SBNtoolkit = Bottle()
 
 @SBNtoolkit.get('/')
-def get_index(data=None):
+def get_index():
   return static_file('index.html', root='app/static/')
+
+@SBNtoolkit.post('/')
+def post_index():
+    code = request.forms.get('code')
+    # import pdb
+    # pdb.set_trace()
+
+    link = retrieve_link('it', 'sbn', code) or \
+           retrieve_link('data', 'sbn', code)
+
+    logger.debug(link)
+    return link
 
 @SBNtoolkit.route('/github')
 def github():
@@ -100,9 +112,10 @@ SBNtoolkit.router.add_filter('code', code_filter)
 def hello(code):
   return "Hello, {code}".format(code=code)
 
-@SBNtoolkit.get('/get/<lang>/<code:code>')
-def get_page(lang, code):
-    link = retrieve_link(lang, code)
+@SBNtoolkit.get('/get/<lang>/<code_type>/<code:code>')
+@SBNtoolkit.get('/get/<lang>/sbn/<code:code>')
+def get_page(lang, code, code_type='sbn'):
+    link = retrieve_link(lang, code_type, code)
     return link
 
 def link_not_found(lang, code_type, code):

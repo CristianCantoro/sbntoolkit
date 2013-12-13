@@ -46,27 +46,32 @@
 
     <div id="container">
 
-        <h1>SBN Toolkit</h1>
+        <h1>SBN Toolkit
+            <span id="beta" title="This tool is in beta version, you may experience bugs or headaches while using it"><sup> &beta;</sup></span>
+        </h1>
 
         <div id="premise">
-        Do you know that intense sensation of annoyance that gets you when you want to share a PDF url and you are unable 
-        to retrieve it easily from a Google search?
-        You can try copying the url but what you are looking for is flooded with Google search <em>paramajob</em> and if you click
-        on the result your browser will eagerly either download the file on your computer or open it with a viewer.<br />
-        <span>Then you would like to say just this:</span></p>
+            The SBN Toolkit will be a collection of tool to work with Italian authority codes (SBN codes) on Wikipedia.
         </div>
  
         <div id="primary-content">
-           <form class='inputform' method="post"> 
-                  <input id='search' title='Insert SBN code here.' type='text' placeholder='SBN code, e. g. IT\CICCU\CCFIV\C009079' value=''/>
+           <form class='inputform' name='inputform' method="POST"> 
+                  <input id='search' title='Insert SBN code here.' type='text' name='code' placeholder='SBN code, e. g. IT\CICCU\CCFIV\C009079' value=''/>
                   <span class='button_wrapper'>
                       <input id='submit' type='submit' value='Find the Italian Wikipedia corresponding page' />
                   </span>
-              </form>
+            </form>
         </div>
 
         <div id="results-placeholder">
         </div>
+
+        <h2>Altri tool</h2>
+        <ul>
+            <li><a href="./list" title="Lista di item con codice VIAF, senza codice SBN in Wikipedia in Italiano"> 
+                Lista di item con codice VIAF, senza codice SBN in Wikipedia in Italiano</a>
+            </li>
+        </ul>
 
         <div id="footer" role="contentinfo">
           <p>

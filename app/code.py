@@ -35,6 +35,8 @@ def retrieve_link(lang, code_type, code):
         res_type = 'pages'
         other_type = 'data'
 
+    code = code.replace('/','\\')
+
     ids = database.query_code(code_type, code)
 
     if ids and ids[IDS[res_type]]:
