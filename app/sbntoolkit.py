@@ -43,8 +43,6 @@ rootlogger.addHandler(console)
 logger = logging.getLogger('sbnredirect.app')
 
 # global
-DOMAIN = 'http://baliststaging.es'
-
 GITHUB = 'http://github.com/CristianCantoro'
 
 WIKIPEDIA = 'http://{lang}.wikipedia.org/wiki/{page}'
@@ -148,15 +146,6 @@ def redirect_sbn(lang, code, code_type='sbn'):
                               code_type=code_type,
                               code=code
                              )
-
-
-@SBNtoolkit.get('/download')
-@SBNtoolkit.get('/download/<filepath:path>')
-def download(filepath=None):
-    if filepath:
-        redirect(urljoin(DOMAIN,'download/{}'.format(filepath)))
-    else:
-        redirect(urljoin(DOMAIN,'download'))
 
 @SBNtoolkit.get('/list')
 def get_list(filepath=None):
