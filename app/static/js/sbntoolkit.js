@@ -20,7 +20,6 @@ $(document).ready(
 
             $.ajax({
                 type: "POST",
-                url: "/",
                 data: postData,
                 success: function (post_response) {
                     $('#submit').removeAttr('disabled');

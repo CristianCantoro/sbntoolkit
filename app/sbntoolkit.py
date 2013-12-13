@@ -212,8 +212,6 @@ def error404(error):
 
 if __name__ == '__main__':
 
-    logger.debug('test')
-
     if not os.path.isdir('app'):
         basedir = os.path.dirname(os.path.realpath(__file__))
         new_basedir = os.path.realpath(os.path.join(basedir,'..'))
@@ -221,4 +219,11 @@ if __name__ == '__main__':
         os.chdir(new_basedir)
         print 'new_basedir', new_basedir
 
-    run(SBNtoolkit,host='0.0.0.0', port=39600, debug=True,reloader=True)
+    app = Bottle()
+
+    @app.get('/')
+    @app.get('/sbnt')
+    def app_index():
+        return redirect('/sbnt/')
+    app.mount(prefix='/sbnt/', app=SBNtoolkit)
+    run(app, host='localhost', port=39600, debug=True, reloader=True)
