@@ -213,3 +213,21 @@ div.pager span {
 div.pager span.active {
     background: #c00;
 }
+
+#sbn_found {
+    padding: 5px 30px;
+    width: auto;
+    border: none;
+    background-color: #A6FFAD;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+#sbn_not_found {
+    padding: 5px 30px;
+    width: auto;
+    border: none;
+    background-color: #FF9E9E;
+    border-radius: 4px;
+    display: inline-block;
+}

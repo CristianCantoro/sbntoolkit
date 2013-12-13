@@ -59,14 +59,33 @@ def get_index():
 @SBNtoolkit.post('/')
 def post_index():
     code = request.forms.get('code')
-    # import pdb
-    # pdb.set_trace()
 
-    link = retrieve_link('it', 'sbn', code) or \
-           retrieve_link('data', 'sbn', code)
 
-    logger.debug(link)
-    return link
+    link_info = retrieve_link('it', 'sbn', code) or \
+                retrieve_link('data', 'sbn', code)
+
+    if link_info:
+        logger.debug(link_info)
+        page, res_type, linked = link_info
+        
+        if res_type == 'data':
+            return template('sbn_to_wiki_via_data',
+                            code=code,
+                            page=page,
+                            link=page.replace(' ', '_'),
+                            item=linked
+                            )
+        else:
+            return template('sbn_to_wiki',
+                            code=code,
+                            page=page,
+                            link=page.replace(' ', '_')
+                            )
+
+    else:
+        return template('sbn_not_found',
+                        code=code
+                        )
 
 @SBNtoolkit.route('/github')
 def github():
@@ -114,7 +133,9 @@ def hello(code):
 @SBNtoolkit.get('/get/<lang>/sbn/<code:code>')
 def get_page(lang, code, code_type='sbn'):
     link = retrieve_link(lang, code_type, code)
-    return link
+    if link_info:
+        link, res_type, linked = link_info
+        return link
 
 def link_not_found(lang, code_type, code):
     if lang == 'data' or lang == 'wikidata':
@@ -131,9 +152,10 @@ def link_not_found(lang, code_type, code):
 @SBNtoolkit.get('/redirect/<lang>/<code_type>/<code>')
 @SBNtoolkit.get('/redirect/<lang>/sbn/<code:code>')
 def redirect_sbn(lang, code, code_type='sbn'):
-    link = retrieve_link(lang, code_type, code)
+    link_info = retrieve_link(lang, code_type, code)
 
-    if link:
+    if link_info:
+        link, res_type, linked = link_info
         link = link.encode('utf-8')
         if lang == 'data' or lang == 'wikidata':
             link = WIKIDATA.format(item=link)

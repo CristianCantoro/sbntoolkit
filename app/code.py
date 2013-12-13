@@ -39,14 +39,22 @@ def retrieve_link(lang, code_type, code):
 
     ids = database.query_code(code_type, code)
 
+    title = None
     if ids and ids[IDS[res_type]]:
-        return database.retrieve_from(code_type, res_type, code)['title']
+        return (database.retrieve_from(code_type, res_type, code)['title'], 
+                res_type,
+                title
+                )
     else:
         retrieve = database.retrieve_from(code_type, other_type, code)
         if retrieve:
             linked = retrieve['linked']
+            title = retrieve['title']
             if linked:
-                return database.query_id(res_type, linked)['title']
+                return (database.query_id(res_type, linked)['title'],
+                        other_type,
+                        title
+                        )
 
 def viaf_and_nosbn_in_itwiki(offset=None, perpage=None):
     fields = ('viaf.code',
