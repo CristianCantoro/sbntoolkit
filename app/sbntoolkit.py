@@ -43,7 +43,7 @@ rootlogger.addHandler(console)
 logger = logging.getLogger('sbnredirect.app')
 
 # global
-GITHUB = 'http://github.com/CristianCantoro'
+GITHUB = 'http://github.com/CristianCantoro/SBNtoolkit'
 
 WIKIPEDIA = 'http://{lang}.wikipedia.org/wiki/{page}'
 WIKIDATA = 'http://www.wikidata.org/wiki/{item}'
