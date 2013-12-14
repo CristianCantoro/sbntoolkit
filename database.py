@@ -38,7 +38,7 @@ def create():
                               )
                         """)
             cur.execute("""CREATE TABLE 
-                           viaf(code TEXT PRIMARY KEY,
+                           viaf(code INT PRIMARY KEY,
                                 page_id BIGINT,
                                 data_id BIGINT
                                )
@@ -58,7 +58,7 @@ def create():
                         """)
             cur.execute("""CREATE TABLE 
                            Data(id BIGINT PRIMARY KEY,
-                                title TEXT,
+                                title INT,
                                 touched BIGINT, 
                                 latest BIGINT,
                                 linked BIGINT)
@@ -147,6 +147,7 @@ def write_info(page, data):
                 linked = data and data['pageid']
             else:
                 linked = page and page['pageid']
+                title = datum['title'].replace('Q', '')
 
             query = """INSERT OR REPLACE INTO 
                             {table}(id,
@@ -243,7 +244,7 @@ def query_code(codename, code):
 def query(query):
     con = sqlite.connect(DATABASE)
 
-    logger.debug(query)
+    # logger.debug(query)
     data = None
     try:
         with con:

@@ -231,3 +231,63 @@ div.pager span.active {
     border-radius: 4px;
     display: inline-block;
 }
+
+table {
+    position: relative;
+    vertical-align: middle;
+}
+
+th.ordered {
+    background-color: #C7D1DE;
+}
+
+th span.text {
+    float: left;
+    padding: 10% 8%;
+}
+
+th #sorticon {
+    float: right;
+    margin: 5px 5px;
+}
+
+th #sorticon a {
+    width: 22px;
+    height: 22px;
+    margin: 2px;
+    padding: -1px;
+    display: block;
+    /*border: solid 1px #000;*/
+}
+
+th #sorticon a.asc {
+    background: url(../images/sort_s.png) no-repeat;
+    background-position: 1px 1px;
+}
+
+th #sorticon a.desc {
+    background: url(../images/sort_s.png) no-repeat;
+    background-position: 1px -24px;
+}
+
+th #sorticon a.asc:hover {
+    background-position: -31px 1px;
+}
+
+th #sorticon a.desc:hover {
+    background: url(../images/sort_s.png) no-repeat;
+    background-position: -31px -24px;
+}
+
+th.ordered #sorticon a.active {
+    pointer-events: none;
+    cursor: default;
+}
+
+th.ordered #sorticon a.asc.active {
+    background-position: -63px 0px;
+}
+
+th.ordered #sorticon a.desc.active {
+    background-position: -63px -24px;
+}

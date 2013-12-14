@@ -18,13 +18,13 @@ from urlparse import urljoin
 from code import retrieve_link, viaf_and_nosbn_in_itwiki
 
 # logging
-# logging
-LOGFORMAT_STDOUT = {logging.DEBUG: '%(module)s:%(funcName)s:%(lineno)s - %(levelname)-8s: %(message)s',
-                    logging.INFO: '%(levelname)-8s: %(message)s',
-                    logging.WARNING: '%(levelname)-8s: %(message)s',
-                    logging.ERROR: '%(levelname)-8s: %(message)s',
-                    logging.CRITICAL: '%(levelname)-8s: %(message)s'
-                    }
+LOGFORMAT_STDOUT = {
+    logging.DEBUG: '%(module)s:%(funcName)s:%(lineno)s - '
+                   '%(levelname)-8s: %(message)s',
+    logging.INFO: '%(levelname)-8s: %(message)s',
+    logging.WARNING: '%(levelname)-8s: %(message)s',
+    logging.ERROR: '%(levelname)-8s: %(message)s',
+    logging.CRITICAL: '%(levelname)-8s: %(message)s'}
 
 # --- root logger
 rootlogger = logging.getLogger('sbnredirect')
@@ -48,26 +48,27 @@ GITHUB = 'http://github.com/CristianCantoro/SBNtoolkit'
 WIKIPEDIA = 'http://{lang}.wikipedia.org/wiki/{page}'
 WIKIDATA = 'http://www.wikidata.org/wiki/{item}'
 
-TEMPLATE_PATH.append(os.path.join('app','views'))
+TEMPLATE_PATH.append(os.path.join('app', 'views'))
 
 SBNtoolkit = Bottle()
 
+
 @SBNtoolkit.get('/')
 def get_index():
-  return static_file('index.html', root='app/static/')
+    return static_file('index.html', root='app/static/')
+
 
 @SBNtoolkit.post('/')
 def post_index():
     code = request.forms.get('code')
 
-
     link_info = retrieve_link('it', 'sbn', code) or \
-                retrieve_link('data', 'sbn', code)
+        retrieve_link('data', 'sbn', code)
 
     if link_info:
         logger.debug(link_info)
         page, res_type, linked = link_info
-        
+
         if res_type == 'data':
             return template('sbn_to_wiki_via_data',
                             code=code,
@@ -87,28 +88,34 @@ def post_index():
                         code=code
                         )
 
+
 @SBNtoolkit.route('/github')
 def github():
     redirect(GITHUB)
 
+
 @SBNtoolkit.route('/sbnt/css/<css_file>')
 @SBNtoolkit.route('/css/<css_file>')
 def serve_css(css_file):
-  return static_file(css_file, root='app/static/css')
+    return static_file(css_file, root='app/static/css')
+
 
 @SBNtoolkit.route('/sbnt/images/<filepath:path>')
 @SBNtoolkit.route('/images/<filepath:path>')
 def serve_images(filepath):
-  return static_file(filepath, root='app/static/images')
+    return static_file(filepath, root='app/static/images')
+
 
 @SBNtoolkit.route('/sbnt/js/<filepath:path>')
 @SBNtoolkit.route('/js/<filepath:path>')
 def serve_js(filepath):
-  return static_file(filepath, root='app/static/js')
+    return static_file(filepath, root='app/static/js')
+
 
 @SBNtoolkit.route('/favicon.ico')
 def serve_favicon():
-  return static_file('favicon.ico', root='app/static/')
+    return static_file('favicon.ico', root='app/static/')
+
 
 def code_filter(config):
     ''' Matches a IT\ICCU\ code'''
@@ -116,7 +123,7 @@ def code_filter(config):
     regexp = r'IT(\\|/)?ICCU(\\|/)?.*'
 
     def to_python(match):
-        return match.replace('/','\\')
+        return match.replace('/', '\\')
 
     def to_url(string):
         return string
@@ -125,9 +132,11 @@ def code_filter(config):
 
 SBNtoolkit.router.add_filter('code', code_filter)
 
+
 @SBNtoolkit.get('/hello/<code:code>')
 def hello(code):
-  return "Hello, {code}".format(code=code)
+    return "Hello, {code}".format(code=code)
+
 
 @SBNtoolkit.get('/get/<lang>/<code_type>/<code:code>')
 @SBNtoolkit.get('/get/<lang>/sbn/<code:code>')
@@ -136,6 +145,7 @@ def get_page(lang, code, code_type='sbn'):
     if link_info:
         link, res_type, linked = link_info
         return link
+
 
 def link_not_found(lang, code_type, code):
     if lang == 'data' or lang == 'wikidata':
@@ -147,7 +157,8 @@ def link_not_found(lang, code_type, code):
                     target=target,
                     code_type=code_type,
                     code=code
-                   )
+                    )
+
 
 @SBNtoolkit.get('/redirect/<lang>/<code_type>/<code>')
 @SBNtoolkit.get('/redirect/<lang>/sbn/<code:code>')
@@ -160,21 +171,23 @@ def redirect_sbn(lang, code, code_type='sbn'):
         if lang == 'data' or lang == 'wikidata':
             link = WIKIDATA.format(item=link)
         else:
-            link = WIKIPEDIA.format(lang='it',page=link)
+            link = WIKIPEDIA.format(lang='it', page=link)
 
         redirect(link)
     else:
         return link_not_found(lang=lang,
                               code_type=code_type,
                               code=code
-                             )
+                              )
+
 
 @SBNtoolkit.get('/list')
 def get_list(filepath=None):
 
     p = request.query.get('p')
-
-    logger.debug('p: {}'.format(p))
+    #n = request.query.get('n')
+    o = request.query.get('o')
+    v = request.query.get('v')
 
     page = 0
     try:
@@ -183,35 +196,60 @@ def get_list(filepath=None):
     except:
         logger.error(p)
 
+    n = 500
     items_per_page = 500
+    try:
+        if n:
+            items_per_page = int(n)
+    except:
+        logger.error(n)
+
+    order = None
+    try:
+        COLUMNS = ['viaf.code', 'data.title', 'pages.title']
+        order = o in COLUMNS and o or None
+    except:
+        logger.error(o)
+
+    direction = None
+    try:
+        DIRECTIONS = ['asc', 'desc']
+        direction = v in DIRECTIONS and v or None
+    except:
+        logger.error(o)
 
     offset = page*items_per_page
 
     logger.debug('page: {}'.format(page))
     logger.debug('offset: {}'.format(offset))
+    logger.debug('order: {}'.format(order))
 
     tot_items, items = viaf_and_nosbn_in_itwiki(offset=offset,
-                                                        perpage=items_per_page
-                                                       )
-
+                                                perpage=items_per_page,
+                                                order=order,
+                                                direction=direction
+                                                )
 
     item_list = []
     for item in items:
         code = item['viaf.code']
         page_id = item['viaf.page_id']
         item_id = item['viaf.data_id']
-        wikipedia_link = WIKIPEDIA.format(lang='it',
-                                   page=item['pages.title'].encode('utf-8')
-                                  )
+        wikipedia_link = WIKIPEDIA.format(
+            lang='it',
+            page=item['pages.title'].encode('utf-8')
+        )
         wikipedia_title = '<a href="{link}">{title}</a>'.format(
-                            link=wikipedia_link,
-                            title=item['pages.title'].encode('utf-8')
-                           )
-        wikidata_link = WIKIDATA.format(item=item['data.title'])
-        wikidata_title = '<a href="{link}">{title}</a>'.format(
-                            link=wikidata_link,
-                            title=item['data.title']
-                           )
+            link=wikipedia_link,
+            title=item['pages.title'].encode('utf-8')
+        )
+        wikidata_link = WIKIDATA.format(
+            item='Q'+str(item['data.title'])
+        )
+        wikidata_title = '<a href="{link}">Q{title}</a>'.format(
+            link=wikidata_link,
+            title=item['data.title']
+        )
         linked = item['data.linked']
 
         item_list.append([code, page_id, wikidata_title,
@@ -226,17 +264,22 @@ def get_list(filepath=None):
     return template('list.tpl',
                     items=item_list,
                     active_page=page + 1,
-                    tot_pages=tot_pages)
+                    order=order,
+                    direction=direction,
+                    tot_pages=tot_pages
+                    )
+
 
 @error(404)
 def error404(error):
     return 'Nothing here, sorry'
 
+
 if __name__ == '__main__':
 
     if not os.path.isdir('app'):
         basedir = os.path.dirname(os.path.realpath(__file__))
-        new_basedir = os.path.realpath(os.path.join(basedir,'..'))
+        new_basedir = os.path.realpath(os.path.join(basedir, '..'))
 
         os.chdir(new_basedir)
         print 'new_basedir', new_basedir

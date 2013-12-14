@@ -10,10 +10,9 @@ logger = logging.getLogger('sbnredirect.app.code')
 # global
 TABLES = ['viaf', 'sbn', 'lccn']
 
-IDS = {
-'data': 'data_id',
-'pages': 'page_id'
-}
+IDS = {'data': 'data_id',
+       'pages': 'page_id'
+       }
 
 WIKIPEDIA = 'http://{lang}.wikipedia.org/wiki/{page}'
 
@@ -27,6 +26,7 @@ def retrieve_page_(lang, code_type, code):
         page = 'Alessandro_Manzoni'
     return page
 
+
 def retrieve_link(lang, code_type, code):
     if lang == 'data' or lang == 'wikidata':
         res_type = 'data'
@@ -35,13 +35,13 @@ def retrieve_link(lang, code_type, code):
         res_type = 'pages'
         other_type = 'data'
 
-    code = code.replace('/','\\')
+    code = code.replace('/', '\\')
 
     ids = database.query_code(code_type, code)
 
     title = None
     if ids and ids[IDS[res_type]]:
-        return (database.retrieve_from(code_type, res_type, code)['title'], 
+        return (database.retrieve_from(code_type, res_type, code)['title'],
                 res_type,
                 title
                 )
@@ -56,20 +56,36 @@ def retrieve_link(lang, code_type, code):
                         title
                         )
 
-def viaf_and_nosbn_in_itwiki(offset=None, perpage=None):
+
+def viaf_and_nosbn_in_itwiki(offset=None,
+                             perpage=None,
+                             order=None,
+                             direction=None
+                             ):
     fields = ('viaf.code',
               'viaf.page_id',
               'viaf.data_id',
               'data.title',
               'data.linked',
               'pages.title'
-             )
+              )
 
-    if not isinstance(offset, int):
-        offset = 0
+    offset = isinstance(offset, int) and offset or 0
+    logger.debug(offset)
 
-    if not isinstance(perpage, int):
-        perpage = 500
+    perpage = isinstance(perpage, int) and perpage or 500
+    logger.debug(perpage)
+
+    order = order or ''
+
+    if order in fields:
+        order = 'ORDER BY {}'.format(order)
+        if direction:
+            order = order + ' {}'.format(direction)
+    else:
+        order = ''
+
+    logger.debug(order)
 
     query = """
             SELECT {fields}
@@ -82,12 +98,14 @@ def viaf_and_nosbn_in_itwiki(offset=None, perpage=None):
                      FROM sbn
                      WHERE data_id NOT NULL)
                 AND pages.id = data.linked
+            {order}
             LIMIT {perpage}
             OFFSET {offset}
             """.format(fields=', '.join(fields),
                        offset=offset,
-                       perpage=perpage
-                      )
+                       perpage=perpage,
+                       order=order
+                       )
 
     data = database.query(query)
 
@@ -104,7 +122,9 @@ def viaf_and_nosbn_in_itwiki(offset=None, perpage=None):
                      FROM sbn
                      WHERE data_id NOT NULL)
                 AND pages.id = data.linked
-            """.format(fields=', '.join(fields))
+            """
+
+    logger.debug(query)
 
     res = database.query(query)
 
@@ -116,21 +136,18 @@ def viaf_and_nosbn_in_itwiki(offset=None, perpage=None):
 
     items = tot, [dict(zip(fields, d)) for d in data]
 
-
-    # import pdb
-    # pdb.set_trace()
-
     return items
 
 
 if __name__ == '__main__':
     # logging
-    LOGFORMAT_STDOUT = {logging.DEBUG: '%(module)s:%(funcName)s:%(lineno)s - %(levelname)-8s: %(message)s',
-                        logging.INFO: '%(levelname)-8s: %(message)s',
-                        logging.WARNING: '%(levelname)-8s: %(message)s',
-                        logging.ERROR: '%(levelname)-8s: %(message)s',
-                        logging.CRITICAL: '%(levelname)-8s: %(message)s'
-                        }
+    LOGFORMAT_STDOUT = {
+        logging.DEBUG: '%(module)s:%(funcName)s:%(lineno)s - '
+                       '%(levelname)-8s: %(message)s',
+        logging.INFO: '%(levelname)-8s: %(message)s',
+        logging.WARNING: '%(levelname)-8s: %(message)s',
+        logging.ERROR: '%(levelname)-8s: %(message)s',
+        logging.CRITICAL: '%(levelname)-8s: %(message)s'}
 
     # --- root logger
     rootlogger = logging.getLogger('sbnredirect')

@@ -49,24 +49,43 @@
 
         <div class="pager">
             %for pagenum in xrange(1,tot_pages+1):
-                <a href="?p={{pagenum}}">
-                %if active_page == pagenum: 
-                    <span class="page-number active">{{pagenum}}</span></a>
-                %else:
-                    <span class="page-number">{{pagenum}}</span>
-                %end
+                <a href="?p={{pagenum}}{{'&o=' + order if order else ''}}{{'&v=' + direction if direction else ''}}">{{!'<span class="page-number active">' if active_page == pagenum else '<span class="page-number">'}}{{pagenum}}</span></a>
                 </a>
             %end
         </div>
         <table class="paginated" border="1">
             <thead>
                 <tr>
-                    <th scope="col" style="width: 10%;">codice VIAF</th>
-                    <th scope="col" style="width: 10%;">ID pagina it.wiki</th>  
-                    <th scope="col" style="width: 10%;">Item Wikidata</th> 
-                    <th scope="col" style="width: 30%;">Titolo pagina it.wiki</th>
-                    <th scope="col" style="width: 10%;">ID wikidata</th>
-                    <th scope="col" style="width: 10%;">ID collegato</th>
+                    <th class="{{'ordered' if order == 'viaf.code' else ''}}" scope="col" style="width: 20%;">
+                        <span class="text">codice VIAF</span>
+                        <div id="sorticon">
+                            <a class="asc{{' active' if direction == 'asc' else ''}}" href="?p={{active_page}}&o=viaf.code&v=asc"></a>
+                            <a class="desc{{' active' if direction == 'desc' else ''}}" href="?p={{active_page}}&o=viaf.code&v=desc"></a>
+                        </div>
+                    </th>
+                    <th scope="col" style="width: 10%;">
+                        <span class="text">ID pagina it.wiki</span>
+                    </th>  
+                    <th class="{{'ordered' if order == 'data.title' else ''}}" scope="col" style="width: 20%;">
+                        <span class="text">Item Wikidata</span>
+                        <div id="sorticon">
+                            <a class="asc{{' active' if direction == 'asc' else ''}}" href="?p={{active_page}}&o=data.title&v=asc"></a>
+                            <a class="desc{{' active' if direction == 'desc' else ''}}" href="?p={{active_page}}&o=data.title&v=desc"></a>
+                        </div>
+                    </th> 
+                    <th class="{{'ordered' if order == 'pages.title' else ''}}" scope="col" style="width: 30%;">
+                        <span class="text">Titolo pagina it.wiki</span>
+                        <div id="sorticon">
+                            <a class="asc{{' active' if direction == 'asc' else ''}}" href="?p={{active_page}}&o=pages.title&v=asc"></a>
+                            <a class="desc{{' active' if direction == 'desc' else ''}}" href="?p={{active_page}}s&o=pages.title&v=desc"></a>
+                        </div>
+                    </th>
+                    <th scope="col" style="width: 15%;">
+                        <span class="text">ID wikidata</span>
+                    </th>
+                    <th scope="col" style="width: 15%;">
+                        <span class="text">ID collegato</span>
+                    </th>
                 </tr>
             </thead>
 
