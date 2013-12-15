@@ -58,7 +58,7 @@
                 <tr>
                     <th class="{{'ordered' if order == 'viaf.code' else ''}}" scope="col" style="width: 20%;">
                         <span class="text">codice VIAF</span>
-                        <div id="sorticon">
+                        <div class="sorticon">
                             <a class="asc{{' active' if direction == 'asc' else ''}}" href="?p={{active_page}}&o=viaf.code&v=asc"></a>
                             <a class="desc{{' active' if direction == 'desc' else ''}}" href="?p={{active_page}}&o=viaf.code&v=desc"></a>
                         </div>
@@ -68,14 +68,14 @@
                     </th>  
                     <th class="{{'ordered' if order == 'data.title' else ''}}" scope="col" style="width: 20%;">
                         <span class="text">Item Wikidata</span>
-                        <div id="sorticon">
+                        <div class="sorticon">
                             <a class="asc{{' active' if direction == 'asc' else ''}}" href="?p={{active_page}}&o=data.title&v=asc"></a>
                             <a class="desc{{' active' if direction == 'desc' else ''}}" href="?p={{active_page}}&o=data.title&v=desc"></a>
                         </div>
                     </th> 
                     <th class="{{'ordered' if order == 'pages.title' else ''}}" scope="col" style="width: 30%;">
                         <span class="text">Titolo pagina it.wiki</span>
-                        <div id="sorticon">
+                        <div class="sorticon">
                             <a class="asc{{' active' if direction == 'asc' else ''}}" href="?p={{active_page}}&o=pages.title&v=asc"></a>
                             <a class="desc{{' active' if direction == 'desc' else ''}}" href="?p={{active_page}}s&o=pages.title&v=desc"></a>
                         </div>

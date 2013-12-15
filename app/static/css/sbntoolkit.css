@@ -194,8 +194,12 @@ input.text:focus {
 }
 
 div.pager {
-    text-align: center;
     margin: 1em 0;
+}
+
+div.pager a {
+    display: inline-block;
+    margin-bottom: 4px;
 }
 
 div.pager span {
@@ -237,21 +241,24 @@ table {
     vertical-align: middle;
 }
 
+th {
+    vertical-align: middle;
+    position: relative;
+    line-height: 1.2em;
+    height: 50px;
+}
+
 th.ordered {
     background-color: #C7D1DE;
 }
 
-th span.text {
-    float: left;
-    padding: 10% 8%;
+th .sorticon {
+    position: absolute;
+    top: 2px;
+    right: 5px;
 }
 
-th #sorticon {
-    float: right;
-    margin: 5px 5px;
-}
-
-th #sorticon a {
+th .sorticon a {
     width: 22px;
     height: 22px;
     margin: 2px;
@@ -260,21 +267,21 @@ th #sorticon a {
     /*border: solid 1px #000;*/
 }
 
-th #sorticon a.asc {
+th .sorticon a.asc {
     background: url(../images/sort_s.png) no-repeat;
     background-position: 1px 1px;
 }
 
-th #sorticon a.desc {
+th .sorticon a.desc {
     background: url(../images/sort_s.png) no-repeat;
     background-position: 1px -24px;
 }
 
-th #sorticon a.asc:hover {
+th .sorticon a.asc:hover {
     background-position: -31px 1px;
 }
 
-th #sorticon a.desc:hover {
+th .sorticon a.desc:hover {
     background: url(../images/sort_s.png) no-repeat;
     background-position: -31px -24px;
 }
