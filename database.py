@@ -14,7 +14,7 @@ logger = logging.getLogger('sbnredirect.database')
 # global
 DBNAME = 'sbnredirect.db'
 DBPATH = os.path.realpath(os.path.join(os.path.dirname(
-    os.path.realpath(__file__)), 'app'))
+    os.path.realpath(__file__)), '..', 'app'))
 
 DATABASE = os.path.join(DBPATH, DBNAME)
 
