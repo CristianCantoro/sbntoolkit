@@ -11,11 +11,13 @@ from bottle import TEMPLATE_PATH
 from bottle import request
 
 import os
+import re
 import logging
 import math
 from urlparse import urljoin
 
 from code import retrieve_link, viaf_and_nosbn_in_itwiki
+from viafsbn import search_viaf, search_sbn
 
 # logging
 LOGFORMAT_STDOUT = {
@@ -50,6 +52,8 @@ WIKIDATA = 'http://www.wikidata.org/wiki/{item}'
 
 TEMPLATE_PATH.append(os.path.join('app', 'views'))
 
+REGEXP = r'IT(\\|/)?ICCU(\\|/)?.*'
+
 SBNtoolkit = Bottle()
 
 
@@ -60,7 +64,7 @@ def get_index():
 
 @SBNtoolkit.post('/')
 def post_index():
-    code = request.forms.get('code')
+    code = request.forms.get('code').strip()
 
     link_info = retrieve_link('it', 'sbn', code) or \
         retrieve_link('data', 'sbn', code)
@@ -84,8 +88,9 @@ def post_index():
                             )
 
     else:
-        return template('sbn_not_found',
-                        code=code
+        return template('code_not_found',
+                        code=code,
+                        tipo='SBN'
                         )
 
 
@@ -120,15 +125,13 @@ def serve_favicon():
 def code_filter(config):
     ''' Matches a IT\ICCU\ code'''
 
-    regexp = r'IT(\\|/)?ICCU(\\|/)?.*'
-
     def to_python(match):
         return match.replace('/', '\\')
 
     def to_url(string):
         return string
 
-    return regexp, to_python, to_url
+    return REGEXP, to_python, to_url
 
 SBNtoolkit.router.add_filter('code', code_filter)
 
@@ -268,6 +271,37 @@ def get_list(filepath=None):
                     direction=direction,
                     tot_pages=tot_pages
                     )
+
+
+@SBNtoolkit.get('/search/<code_type>/<code:code>')
+@SBNtoolkit.get('/search/sbn/<code>')
+def search(code, code_type='SBN'):
+    pass
+
+
+@SBNtoolkit.get('/viafsbn')
+def get_viafsbn():
+    return static_file('viafsbn.html', root='app/static/')
+
+
+@SBNtoolkit.post('/viafsbn')
+def post_viafsbn():
+    code = request.forms.get('code').strip()
+
+    item = None
+    tipo = 'ERRORE'
+    if re.match(REGEXP, code):
+        tipo = 'SBN'
+        code = code.replace('/', '\\')
+        item = search_sbn(code)
+    else:
+        tipo = 'VIAF'
+        item = search_viaf(code)
+
+    if item:
+        return template('viafsbn', item=item, tipo=tipo)
+    else:
+        return template('code_not_found', code=code, tipo=tipo)
 
 
 @error(404)

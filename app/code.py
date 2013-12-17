@@ -85,8 +85,6 @@ def viaf_and_nosbn_in_itwiki(offset=None,
     else:
         order = ''
 
-    logger.debug(order)
-
     query = """
             SELECT {fields}
             FROM viaf, data, pages

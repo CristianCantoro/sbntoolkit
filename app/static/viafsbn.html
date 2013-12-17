@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US"><meta charset="utf-8">
+ <head>
+    <!-- Standard Metadata -->
+    <title>SBN Toolkit</title>
+    <meta name='abstract' content='' />
+    <meta name='description' content='Retrieve a Wikipedia page from SBN authority control codes.' />
+    <meta name='keywords' content='Wikipedia, search, VIAF, SBN, authority control' />
+    <meta name="copyright" content="Cristian Consonni">
+
+    <!-- Dublin Core Metadata -->
+    <meta name="DC.identifier" content="" />
+    <meta name="DC.creator" lang="en" content="Cristian Consonni">
+    <meta name="DC.date.created" lang="en" content="2013-10-29">
+    <meta name="DC.date.modified" lang="en" content="2013-10-29">
+    <meta name="DC.format" lang="en" content="text/html">
+    <meta name="DC.language" content="en">
+
+    <!-- Open Graph Metadata -->
+    <meta property="og:site_name" content="gmtpun.org">
+    <meta property="og:title" content="SBN Toolkit">
+    <meta property="og:description" content="Retrieve a Wikipedia page from SBN authority control codes.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="">
+
+    <!-- Navigation -->
+    <link rel="home" href="/">
+
+    <!-- Icons -->
+    <link rel="shortcut icon" href="/favicon.ico" type="image/png" />
+ 
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/sbntoolkit.css">
+
+    <!-- JS -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript" src="js/sbntoolkit.js"></script>
+</head>
+
+<body>
+    <div id="container">
+
+        <h1>viafsbn</h1>
+
+        <div id="premise">
+            Ritrova alcune informazioni dai codici VIAF e SBN dai rispettivi siti (<a href="https://www.viaf.org">viaf.org</a> e <a href="https://opac.sbn.it/">opac.sbn.it</a>).<br />
+            <span>Esempi:
+                <ul>
+                    <li>Codice SBN: IT\ICCU\RAVV\024664</li>
+                    <li>Codice VIAF: 75121530</li>
+                </ul>
+            </span>
+            <em>viafsbn</em> può essere scaricato come applicazione da linea di comando da <a href="https://github.com/CristianCantoro/viafsbn">Github</a>.
+        </div>
+        <div id="primary-content">
+           <form class='inputform' name='inputform' method="POST" action="/sbnt/"> 
+                  <input id='search' title='Inserisci un codice SBN o VIAF.' type='text' name='code' placeholder='Codice SBN o VIAF' value=''/>
+                  <span class='button_wrapper'>
+                      <input id='submit' type='submit' value='Cerca il codice' />
+                  </span>
+            </form>
+        </div>
+
+        <div id="results-placeholder">
+        </div>
+
+        <div id="footer" role="contentinfo">
+          <p>
+          You can grab a complete copy of the site on <a href="/sbnt/github">github</a>. The code is released under the 
+          <a id="license" href="#">MIT license</a>, happy hacking! 
+          </p>
+          
+          <div id="license-text">The MIT License (MIT)<br />
+            Copyright (c) 2013 Cristian Consonni<br />
+                  <br />
+                Permission is hereby granted, free of charge, to any person obtaining a copy
+                of this software and associated documentation files (the "Software"), to deal
+                in the Software without restriction, including without limitation the rights
+                to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+                copies of the Software, and to permit persons to whom the Software is
+                furnished to do so, subject to the following conditions:<br />
+                   <br />
+                The above copyright notice and this permission notice shall be included in
+                all copies or substantial portions of the Software.<br />
+                  <br />
+                THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+                IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+                FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+                AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+                LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+                OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+                THE SOFTWARE.</div>
+                
+          <p>Created by Cristian Consonni, contact the author <a href="http://www.google.com/recaptcha/mailhide/d?k=015WAm5_ZV3WJ9ypCL8wRi_w==&c=eMCD8sxBc1Q30KvwUL1jqC680Byi1J503veZMaY3ABI=">here</a>. Any feedback is appreciated.</p>
+
+        </div><!-- /#footer -->
+    </div><!-- /#container -->
+
+
+</body>
+</html>
