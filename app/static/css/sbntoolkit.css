@@ -286,15 +286,15 @@ th .sorticon a.desc:hover {
     background-position: -31px -24px;
 }
 
-th.ordered #sorticon a.active {
+th.ordered .sorticon a.active {
     pointer-events: none;
     cursor: default;
 }
 
-th.ordered #sorticon a.asc.active {
+th.ordered .sorticon a.asc.active {
     background-position: -63px 0px;
 }
 
-th.ordered #sorticon a.desc.active {
+th.ordered .sorticon a.desc.active {
     background-position: -63px -24px;
 }
