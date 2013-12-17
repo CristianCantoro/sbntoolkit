@@ -18,6 +18,7 @@ from urlparse import urljoin
 
 from code import retrieve_link, viaf_and_nosbn_in_itwiki
 from viafsbn import search_viaf, search_sbn
+from viafsbn.format import json_format
 
 # logging
 LOGFORMAT_STDOUT = {
@@ -163,8 +164,8 @@ def link_not_found(lang, code_type, code):
                     )
 
 
-@SBNtoolkit.get('/redirect/<lang>/<code_type>/<code>')
 @SBNtoolkit.get('/redirect/<lang>/sbn/<code:code>')
+@SBNtoolkit.get('/redirect/<lang>/<code_type>/<code>')
 def redirect_sbn(lang, code, code_type='sbn'):
     link_info = retrieve_link(lang, code_type, code)
 
@@ -273,10 +274,25 @@ def get_list(filepath=None):
                     )
 
 
-@SBNtoolkit.get('/search/<code_type>/<code:code>')
-@SBNtoolkit.get('/search/sbn/<code>')
-def search(code, code_type='SBN'):
-    pass
+@SBNtoolkit.get('/search/sbn/<code:code>')
+@SBNtoolkit.get('/search/sbn/<opere:re:opere>/<code:code>')
+@SBNtoolkit.get('/search/<code_type>/<code>')
+def search(code, code_type='SBN', opere=None):
+    item = None
+    opere = opere and True or False
+
+    if code_type.lower() == 'sbn':
+        code_type = 'SBN'
+        item = search_sbn(code, opere)
+    else:
+        code_type = 'VIAF'
+        item = search_viaf(code)
+
+    if item:
+        if opere:
+            return json_format(item, code_type, opere)
+        else:
+            return json_format(item, code_type)
 
 
 @SBNtoolkit.get('/viafsbn')
